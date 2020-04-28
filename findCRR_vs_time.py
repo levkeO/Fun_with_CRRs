@@ -15,6 +15,8 @@ import facil_module as nf
 rho = 1.4                       # number density for periodic boundaries
 numFrames = 512
 numPart = 10002			# number of particles
+numFast = int(numPart/10)
+print(numFast)
 path2 = sys.argv[1]
 filexyz = sys.argv[2] 		# coordinate file from command line
 side  = (numPart / rho)**(1/3)
@@ -32,7 +34,7 @@ def partID(frame,data):
 	"""
 	
 	dist =np.array([nf.squareDist(allCoords[:,particle,:],0,frame,side) for particle in range(numPart)])
-	fastPart = dist.argsort()[:1000]
+	fastPart = dist.argsort()[:numFast]
 	ID = np.array(range(data.particles.count))
 	fast = np.zeros(data.particles.count)
 	for particle in ID:
@@ -47,14 +49,14 @@ s2Largest = []
 numClust = []
 sum5 = []
 with open(outFile,'w') as outFile:
-	for frame in range(1,numFrames,5):
+	for frame in range(1,numFrames,10):
 		node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
 		dist =np.array([nf.squareDist(allCoords[:,particle,:],0,frame,side) for particle in range(numPart)])
-		fastPart = dist.argsort()[:1000]
+		fastPart = dist.argsort()[:numFast]
 		node.modifiers.append(partID)
-		node.modifiers.append(ExpressionSelectionModifier(expression = 'fast ==0 '))
-		node.modifiers.append(DeleteSelectedModifier())
-		node.modifiers.append(ClusterAnalysisModifier(cutoff = 1.5,sort_by_size = True))
+		node.modifiers.append(ExpressionSelectionModifier(expression = 'fast ==1 '))
+		#node.modifiers.append(DeleteSelectedModifier())
+		node.modifiers.append(ClusterAnalysisModifier(cutoff = 1.5,sort_by_size = True,only_selected = True))
 		data = node.compute(frame)
 		#print(np.count_nonzero(data.particles.selection))
 		#print(data.particles.count)
@@ -62,21 +64,21 @@ with open(outFile,'w') as outFile:
 		sLargest.append(cluster_sizes[1])
 		s2Largest.append(cluster_sizes[2])
 		numClust.append(len(cluster_sizes))
-		sum5.append(sum(cluster_sizes[:5]))
+		sum5.append(sum(cluster_sizes[1:6]))
 		#print('number of clusters: ',len(cluster_sizes))
 		#print('largest 5 clusters: ',cluster_sizes)
 		outFile.write('{}\nAtoms. Timestep: {}\n'.format(numPart,frame))
 		for particle in range(numPart):
 			if particle in fastPart:
-				outFile.write('A  {} {} {}\n'.format(allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
+				outFile.write('A {} {} {} {}\n'.format(data.particles['Cluster'].array[particle],allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
 			else:
-				outFile.write('B {} {} {}\n'.format(allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
+				outFile.write('B {} {} {} {}\n'.format(1000,allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
 pl.plot(numClust,'o')
 pl.ylabel('numCLust')
 pl.figure()
 pl.plot(sLargest,'o')
 pl.plot(s2Largest,'o')
 print(np.array(numClust).argmin(),np.array(sLargest).argmax())
-print('number of cluster: ',np.array(numClust).min(),'largest cluster: ',np.array(sLargest).max(),'2nd largest: ',max(s2Largest),max(sum5))
+print('number of cluster: ',np.array(numClust).min(),'\nlargest cluster: ',np.array(sLargest).max(),'\n2nd largest: ',max(s2Largest),'\nSum of the 5 largest clusters:',max(sum5))
 pl.show()
 
