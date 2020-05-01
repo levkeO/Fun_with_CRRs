@@ -49,7 +49,7 @@ s2Largest = []
 numClust = []
 sum5 = []
 with open(outFile,'w') as outFile:
-	for frame in range(1,numFrames,1):
+	for frame in range(1,numFrames-700,1):
 		node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
 		dist =np.array([nf.squareDist(allCoords[:,particle,:],0,frame,side) for particle in range(numPart)])
 		fastPart = dist.argsort()[:numFast]
