@@ -13,7 +13,7 @@ import facil_module as nf
 
 # Variables to change  and load command line arguments:
 rho = 1.4                       # number density for periodic boundaries
-numFrames = 512
+numFrames = 1000
 numPart = 10002			# number of particles
 numFast = int(numPart/10)
 print(numFast)
@@ -49,14 +49,14 @@ s2Largest = []
 numClust = []
 sum5 = []
 with open(outFile,'w') as outFile:
-	for frame in range(1,numFrames,10):
+	for frame in range(1,numFrames,1):
 		node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
 		dist =np.array([nf.squareDist(allCoords[:,particle,:],0,frame,side) for particle in range(numPart)])
 		fastPart = dist.argsort()[:numFast]
 		node.modifiers.append(partID)
 		node.modifiers.append(ExpressionSelectionModifier(expression = 'fast ==1 '))
 		#node.modifiers.append(DeleteSelectedModifier())
-		node.modifiers.append(ClusterAnalysisModifier(cutoff = 1.5,sort_by_size = True,only_selected = True))
+		node.modifiers.append(ClusterAnalysisModifier(cutoff = 1.3,sort_by_size = True,only_selected = True))
 		data = node.compute(frame)
 		#print(np.count_nonzero(data.particles.selection))
 		#print(data.particles.count)
