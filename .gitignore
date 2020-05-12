@@ -1,2 +1,5 @@
 *.xyz
 *.swp
+*.ipynb
+*.npy
+*.pdf
