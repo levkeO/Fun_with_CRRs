@@ -13,7 +13,7 @@ import facil_module as nf
 
 # Variables to change  and load command line arguments:
 rho = 1.4                       # number density for periodic boundaries
-numFrames = 1000
+numFrames = 510
 numPart = 10002			# number of particles
 numFast = int(numPart/10)
 print(numFast)
@@ -49,7 +49,7 @@ s2Largest = []
 numClust = []
 sum5 = []
 with open(outFile,'w') as outFile:
-	for frame in range(1,numFrames-700,1):
+	for frame in range(1,numFrames,1):
 		node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
 		dist =np.array([nf.squareDist(allCoords[:,particle,:],0,frame,side) for particle in range(numPart)])
 		fastPart = dist.argsort()[:numFast]
@@ -78,6 +78,7 @@ pl.ylabel('numCLust')
 pl.figure()
 pl.plot(sLargest,'o')
 pl.plot(s2Largest,'o')
+print(numClust)
 print(np.array(numClust).argmin(),np.array(sLargest).argmax())
 print('number of cluster: ',np.array(numClust).min(),'\nlargest cluster: ',np.array(sLargest).max(),'\n2nd largest: ',max(s2Largest),'\nSum of the 5 largest clusters:',max(sum5))
 pl.show()

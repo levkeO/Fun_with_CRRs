@@ -13,13 +13,13 @@ import pylab as pl
 import sys
 
 #Parameters that you might want to change:
-cut = 10		# cutoff for g(r)
+cut =15		# cutoff for g(r)
 numBins = 250		# number of bins u=in g(r) calculation
 L = 19.25985167448	# length of box
 start =None		# first frame to calculate, if this is set to None it will calculate the entire trajectory
 end = None		# last frame to calculate
 
-node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
+node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type","fast", "Position.X", "Position.Y", "Position.Z"])
 
 def gr(node,cut,bins,partType = None,startFrame=0,endFrame=node.source.num_frames,step=1):
 	"""
@@ -40,7 +40,8 @@ def gr(node,cut,bins,partType = None,startFrame=0,endFrame=node.source.num_frame
 	"""
 	# If particle type is given delete all other partcles
 	if partType:
-		node.modifiers.append(SelectTypeModifier(types={partType}))
+		#node.modifiers.append(SelectTypeModifier(types={partType}))
+		node.modifiers.append(ExpressionSelectionModifier(expression = 'fast==1'))
 		node.modifiers.append(InvertSelectionModifier())
 		node.modifiers.append(DeleteSelectedModifier())
 	node.modifiers.append(set_cell)
@@ -53,6 +54,7 @@ def gr(node,cut,bins,partType = None,startFrame=0,endFrame=node.source.num_frame
 			print ('Frame: ',frame)
 		# # Compute normalized bond vectors
 		data = node.compute(frame)
+		#print(data.particles.count)
 		rdf+=data.tables['coordination-rdf'].xy()
 		counted +=1
 	rdf/=counted
@@ -88,9 +90,10 @@ else:
 #Plot and save the results
 pl.rcParams.update({'font.size': 16})
 pl.plot(r,gr)
+pl.plot(r,[1]*len(r))
 pl.xlabel(r'$r$')
 pl.ylabel(r'$g(r)$')
 pl.tight_layout()
 pl.savefig('gr_'+sys.argv[2][:-4]+'.pdf')
 pl.show()
-np.save('gr_'+sys.argv[2][:-4]+'.npy',[r,gr])
+np.save('gr_cluster1_'+sys.argv[2][:-4]+'.npy',[r,gr])
