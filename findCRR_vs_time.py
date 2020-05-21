@@ -13,7 +13,7 @@ import facil_module as nf
 
 # Variables to change  and load command line arguments:
 rho = 1.4                       # number density for periodic boundaries
-numFrames = 510
+numFrames = sys.argv[3]
 numPart = 10002			# number of particles
 numFast = int(numPart/10)
 print(numFast)
