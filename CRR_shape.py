@@ -74,8 +74,10 @@ if writeFile ==1:
 else:
 	outFile = 'tmp.test'
 frameCount = 0
-r_gyr = np.zeros(len(range(lag,numFrames))+1)
-num1 = np.zeros(len(range(lag,numFrames))+1)
+numNeighTot =[]
+numNeighCl1 = []
+r_gyr = np.zeros(len(range(lag,numFrames)))
+num1 = np.zeros(len(range(lag,numFrames)))
 with open(outFile,'w') as outFile:
 	for frame in range(lag,numFrames,1):
 		node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
@@ -92,6 +94,10 @@ with open(outFile,'w') as outFile:
 		node.modifiers.append(ClusterAnalysisModifier(cutoff = cutoff,sort_by_size = True,only_selected = True))	
 		
 		data = node.compute(frame-int(lag))
+	
+		property_Neigh(data,cutoff)
+		numNeigh = data.particles["neighCut"].array
+		numNeighTot.append(numNeigh)
 		cluster_sizes = np.bincount(data.particles['Cluster'])
 		#print(len(cluster_sizes))
 		sLargest.append(cluster_sizes[1])
@@ -108,7 +114,7 @@ with open(outFile,'w') as outFile:
 				else:
 					outFile.write('B {} {} {} {}\n'.format(1000,allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
 		#Clusters:
-		node.modifiers.append(ExpressionSelectionModifier(expression = 'Cluster ==1'))
+		node.modifiers.append(ExpressionSelectionModifier(expression = 'Cluster <6'))
 		node.modifiers.append(InvertSelectionModifier())
 		node.modifiers.append(DeleteSelectedModifier())
 		data = node.compute(frame)
@@ -131,13 +137,24 @@ with open(outFile,'w') as outFile:
 		#print(gyration, 'gyration', len(coord))
 		r_gyr[frame-lag] = pl.sqrt(gyration/len(coord))
 		num1[frame-lag] = len(coord)
+		property_Neigh(data,cutoff)
+		numNeigh = data.particles["neighCut"].array
+		numNeighCl1.append(numNeigh)
+	#print(numNeighCl1[0])
+
 		#print(data.particles.count)
 # compute the fastest particles for a moving frame: frame + or - lag
 # analyse cluster at intermediate frame ( once the particles are deleted I should be able to to 
 # compute another frame for the same particles
 pl.plot(num1,r_gyr,'o')
 pl.show()
+numNeighTot=np.array(numNeighTot).flatten()
+numNeighCl1=np.array(numNeighCl1).flatten()
+print(numNeighTot)
+#np.pad(num1,(0,9002),mode='constant',constant_values=np.nan)
+print(len(num1),len(r_gyr), len(numNeighTot),len(numNeighCl1))
 np.savetxt('T0.48_fractal_dimension_cut1_3.txt',[num1,r_gyr])
+#np.savetxt('T0.48_neighbours_cut1_3.txt',[numNeighTot])
 # compute the clusters and either choose largest 1-5 or all larger than 50 -100 particles
 # select cluster  and compute NN distrbution, mean nearest neighbour, radius of gyration, fractal dimension
 print(np.array(sLargest).max(),np.array(s2Largest).max(),np.array(sum5).max(),np.array(numClust).max())
