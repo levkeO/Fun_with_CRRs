@@ -95,9 +95,6 @@ with open(outFile,'w') as outFile:
 		
 		data = node.compute(frame-int(lag))
 	
-		property_Neigh(data,cutoff)
-		numNeigh = data.particles["neighCut"].array
-		numNeighTot.append(numNeigh)
 		cluster_sizes = np.bincount(data.particles['Cluster'])
 		#print(len(cluster_sizes))
 		sLargest.append(cluster_sizes[1])
@@ -114,10 +111,21 @@ with open(outFile,'w') as outFile:
 				else:
 					outFile.write('B {} {} {} {}\n'.format(1000,allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
 		#Clusters:
-		node.modifiers.append(ExpressionSelectionModifier(expression = 'Cluster <6'))
+		node.modifiers.append(ExpressionSelectionModifier(expression = 'Cluster >0 '))
 		node.modifiers.append(InvertSelectionModifier())
 		node.modifiers.append(DeleteSelectedModifier())
 		data = node.compute(frame)
+		property_Neigh(data,cutoff)
+		numNeigh = data.particles["neighCut"].array
+		numNeighTot.append(numNeigh)
+		node.modifiers.append(ExpressionSelectionModifier(expression = 'Cluster ==1'))
+		node.modifiers.append(InvertSelectionModifier())
+		node.modifiers.append(DeleteSelectedModifier())
+		data = node.compute(frame)
+		
+		property_Neigh(data,cutoff)
+		numNeigh = data.particles["neighCut"].array
+		numNeighCl1.append(np.array(numNeigh))
 		coord = data.particles['Position'].array
 		avDist = np.array([0.0,0.0,0.0])
 		#print(coord[3])
@@ -137,9 +145,6 @@ with open(outFile,'w') as outFile:
 		#print(gyration, 'gyration', len(coord))
 		r_gyr[frame-lag] = pl.sqrt(gyration/len(coord))
 		num1[frame-lag] = len(coord)
-		property_Neigh(data,cutoff)
-		numNeigh = data.particles["neighCut"].array
-		numNeighCl1.append(numNeigh)
 	#print(numNeighCl1[0])
 
 		#print(data.particles.count)
@@ -149,12 +154,14 @@ with open(outFile,'w') as outFile:
 pl.plot(num1,r_gyr,'o')
 pl.show()
 numNeighTot=np.array(numNeighTot).flatten()
-numNeighCl1=np.array(numNeighCl1).flatten()
-print(numNeighTot)
+numNeighCl1=np.concatenate(numNeighCl1).ravel()
+print(numNeighCl1)
 #np.pad(num1,(0,9002),mode='constant',constant_values=np.nan)
 print(len(num1),len(r_gyr), len(numNeighTot),len(numNeighCl1))
+#Try a Panda structure or maybe a dictionary
 np.savetxt('T0.48_fractal_dimension_cut1_3.txt',[num1,r_gyr])
-#np.savetxt('T0.48_neighbours_cut1_3.txt',[numNeighTot])
+np.savetxt('T0.48_neighbours_cut1_3.txt',numNeighTot)
+np.savetxt('T0.48_neighbours_cl1_cut1_3.txt',numNeighCl1)
 # compute the clusters and either choose largest 1-5 or all larger than 50 -100 particles
 # select cluster  and compute NN distrbution, mean nearest neighbour, radius of gyration, fractal dimension
 print(np.array(sLargest).max(),np.array(s2Largest).max(),np.array(sum5).max(),np.array(numClust).max())
