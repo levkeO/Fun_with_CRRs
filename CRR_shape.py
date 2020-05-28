@@ -30,12 +30,12 @@ def property_Neigh(data,cutoff):
 
 
 filexyz = sys.argv[1]+sys.argv[2]
-lag = 20#argv[3] # time lag max dynamic heterogeneity in frames for chosen file
+lag = int(sys.argv[3]) # time lag max dynamic heterogeneity in frames for chosen file
 
 rho = 1.4                       # number density for periodic boundaries
-numFrames = 350
+numFrames = int(sys.argv[5])
 numPart = 10002                 # number of particles
-numFast = int(numPart/10)
+numFast = int(numPart*0.10)
 print(numFast)
 path2 = sys.argv[1]
 filexyz = sys.argv[2]           # coordinate file from command line
@@ -46,6 +46,18 @@ allCoords = nf.readCoords(path2+filexyz, numFrames,numPart)
 counter =0
 outFile ='fastPart_'+ filexyz[:-4] + '_temp.xyz'
 
+def set_cell(frame, data):
+        """
+        Modifier to set cell of xyz-files
+        """
+        with data.cell_:
+                data.cell_[:,0] = [L, 0., 0.]
+                data.cell_[:,1] = [0., L, 0.]
+                data.cell_[:,2] = [0., 0., L]
+                #cell origin
+                data.cell_[:,3] = [0,  0  ,  0]
+                #set periodic boundary conditions
+                data.cell_.pbc = (True, True, True)
 
 
 def partID(frame,data):
@@ -81,6 +93,7 @@ num1 = np.zeros(len(range(lag,numFrames)))
 with open(outFile,'w') as outFile:
 	for frame in range(lag,numFrames,1):
 		node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
+		node.modifiers.append(set_cell)
 		dist =np.array([nf.squareDist(allCoords[:,particle,:],frame-lag,frame,side) for particle in range(numPart)])
 		data = node.compute(frame-int(lag))
 		fastPart = dist.argsort()[:numFast]
@@ -152,16 +165,18 @@ with open(outFile,'w') as outFile:
 # analyse cluster at intermediate frame ( once the particles are deleted I should be able to to 
 # compute another frame for the same particles
 pl.plot(num1,r_gyr,'o')
-pl.show()
+#pl.show()
 numNeighTot=np.array(numNeighTot).flatten()
 numNeighCl1=np.concatenate(numNeighCl1).ravel()
-print(numNeighCl1)
-#np.pad(num1,(0,9002),mode='constant',constant_values=np.nan)
+
 print(len(num1),len(r_gyr), len(numNeighTot),len(numNeighCl1))
+T = sys.argv[4]
+print(T)
+#np.pad(num1,(0,9002),mode='constant',constant_values=np.nan)
 #Try a Panda structure or maybe a dictionary
-np.savetxt('T0.48_fractal_dimension_cut1_3.txt',[num1,r_gyr])
-np.savetxt('T0.48_neighbours_cut1_3.txt',numNeighTot)
-np.savetxt('T0.48_neighbours_cl1_cut1_3.txt',numNeighCl1)
+np.savetxt('T'+T+'_fractal_dimension_cut1_3_tau_a.txt',[num1,r_gyr])
+np.savetxt('T'+T+'_neighbours_cut1_3_tau_a.txt',numNeighTot)
+np.savetxt('T'+T+'_neighbours_cl1_cut1_tau_a.txt',numNeighCl1)
 # compute the clusters and either choose largest 1-5 or all larger than 50 -100 particles
 # select cluster  and compute NN distrbution, mean nearest neighbour, radius of gyration, fractal dimension
 print(np.array(sLargest).max(),np.array(s2Largest).max(),np.array(sum5).max(),np.array(numClust).max())
