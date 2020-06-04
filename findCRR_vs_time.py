@@ -13,8 +13,8 @@ import facil_module as nf
 
 # Variables to change  and load command line arguments:
 rho = 1.4                       # number density for periodic boundaries
-numFrames = sys.argv[3]
-numPart = 10002			# number of particles
+numFrames = int(sys.argv[3])
+numPart = 100002			# number of particles
 numFast = int(numPart/10)
 print(numFast)
 path2 = sys.argv[1]
@@ -24,7 +24,6 @@ node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Parti
 
 allCoords = nf.readCoords(path2+filexyz, numFrames,numPart)
 counter =0
-outFile ='fastPart_'+ filexyz[:-4] + '_temp.xyz'
 
 
 
@@ -48,6 +47,11 @@ sLargest = []
 s2Largest = []
 numClust = []
 sum5 = []
+writeFile = 0
+if writeFile == 0:
+	outFile = 'temp.txt'
+else:
+	outFile ='fastPart_'+ filexyz[:-4] + '_temp.xyz'
 with open(outFile,'w') as outFile:
 	for frame in range(1,numFrames,1):
 		node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
@@ -67,12 +71,13 @@ with open(outFile,'w') as outFile:
 		sum5.append(sum(cluster_sizes[1:6]))
 		#print('number of clusters: ',len(cluster_sizes))
 		#print('largest 5 clusters: ',cluster_sizes)
-		outFile.write('{}\nAtoms. Timestep: {}\n'.format(numPart,frame))
-		for particle in range(numPart):
-			if particle in fastPart:
-				outFile.write('A {} {} {} {}\n'.format(data.particles['Cluster'].array[particle],allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
-			else:
-				outFile.write('B {} {} {} {}\n'.format(1000,allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
+		if not outFile ==0:
+			outFile.write('{}\nAtoms. Timestep: {}\n'.format(numPart,frame))
+			for particle in range(numPart):
+				if particle in fastPart:
+					outFile.write('A {} {} {} {}\n'.format(data.particles['Cluster'].array[particle],allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
+				else:
+					outFile.write('B {} {} {} {}\n'.format(1000,allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
 pl.plot(numClust,'o')
 pl.ylabel('numCLust')
 pl.figure()
