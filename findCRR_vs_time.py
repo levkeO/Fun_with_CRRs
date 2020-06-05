@@ -48,13 +48,6 @@ def partID(frame,data):
 	Assigns ID to every particle
 	"""
 	
-	dist =np.array([nf.squareDist(allCoords[:,particle,:],0,frame,side) for particle in range(numPart)])
-	fastPart = dist.argsort()[:numFast]
-	ID = np.array(range(data.particles.count))
-	fast = np.zeros(data.particles.count)
-	for particle in ID:
-		if particle in fastPart:
-			fast[particle] = 1
 	data.particles_.create_property('fast', data=fast)
 
 
@@ -68,18 +61,25 @@ else:
 t_numClmin = []
 t_max_largest = []
 t_5max = []
-startFrames = [0,50,100,200,300,400,500]
+startFrames = range(0,400,50)
 for startFrame in  startFrames:
 	sLargest = []
 	s2Largest = []
 	numClust = []
 	sum5 = []
+	print('startFrame: ',startFrame)
 	with open(outFi,'w') as outFile:
 		for frame in range(startFrame+1,numFrames,1):
 			node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
+			node.modifiers.append(set_cell)
+			data = node.compute(frame)
 			dist =np.array([nf.squareDist(allCoords[:,particle,:],startFrame,frame,side) for particle in range(numPart)])
 			fastPart = dist.argsort()[:numFast]
-			#node.modifiers.append(set_cell)
+			ID = np.array(range(data.particles.count))
+			fast = np.zeros(data.particles.count)
+			for particle in ID:
+				if particle in fastPart:
+					fast[particle] = 1
 			node.modifiers.append(partID)
 			node.modifiers.append(ExpressionSelectionModifier(expression = 'fast ==1 '))
 			node.modifiers.append(ClusterAnalysisModifier(cutoff = 1.3,sort_by_size = True,only_selected = True))
@@ -100,8 +100,8 @@ for startFrame in  startFrames:
 	pl.plot(numClust,'o',label=startFrame)
 	pl.ylabel('numCLust')
 	pl.figure(2)
-	pl.plot(sLargest,'o')
-	print('startFrame: ',startFrame,label=startFrame)
+	pl.plot(sLargest,'o',label=startFrame)
+	print('startFrame: ',startFrame)
 	print(np.array(numClust).argmin(),np.array(sLargest).argmax())
 	print('number of cluster: ',np.array(numClust).min(),'\nlargest cluster: ',np.array(sLargest).max(),'\n2nd largest: ',max(s2Largest),'\nSum of the 5 largest clusters:',max(sum5))
 	t_numClmin.append(np.array(numClust).argmin())
