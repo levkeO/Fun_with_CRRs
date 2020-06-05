@@ -32,7 +32,7 @@ def set_cell(frame, data):
                 #set periodic boundary conditions
                 data.cell_.pbc = (True, True, True)
 
-
+#@njit
 def gyration_tensor(_r, Print=False):
     N=_r.shape[0]
     # centre of mass
@@ -107,57 +107,65 @@ def partID(frame,data):
 
 
 gyr=[]
-r_gyr = np.zeros(len(range(lag,numFrames)))
-num1 = np.zeros(len(range(lag,numFrames)))
+num_gyr =[]
+r_gyr = []# np.zeros(len(range(lag,numFrames)))
+num1 = []#np.zeros(len(range(lag,numFrames)))
+ds = []
+es = []
+fs =[]
 for frame in range(lag,lag+10,1):
+	print('frame: ',frame)
 	node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
 	dist =np.array([nf.squareDist(allCoords[:,particle,:],frame-lag,frame,side) for particle in range(numPart)])
-	data = node.compute(frame-int(lag))
+	data = node.compute(frame)
 	fastPart = dist.argsort()[:numFast]
 	ID = np.array(range(data.particles.count))
 	fast = np.zeros(data.particles.count)
+	node.modifiers.append(partID)
+	node.modifiers.append(ExpressionSelectionModifier(expression = 'ParticleType ==1 '))
 	for particle in ID:
 		if particle in fastPart:
 			fast[particle] = 1
+		#node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
+	node.modifiers.append(set_cell)
 	node.modifiers.append(partID)
 	node.modifiers.append(ExpressionSelectionModifier(expression = 'fast ==1 '))
 	node.modifiers.append(ClusterAnalysisModifier(cutoff = cutoff,sort_by_size = True,only_selected = True))	
-		
-	data = node.compute(frame-int(lag))
-	#Clusters:
-	#node.modifiers.append(ExpressionSelectionModifier(expression = 'Cluster >0 '))
-	#node.modifiers.append(InvertSelectionModifier())
-	#node.modifiers.append(DeleteSelectedModifier())
-	#data = node.compute(frame)
-	node.modifiers.append(ExpressionSelectionModifier(expression = 'Cluster ==1'))
-	#node.modifiers.append(InvertSelectionModifier())
-	#node.modifiers.append(DeleteSelectedModifier())
-	node.modifiers.append(set_cell)
-	node.modifiers.append(UnwrapTrajectoriesModifier())
 	data = node.compute(frame)
-	
-	coord = data.particles['Position'].array
-	a,b,c,R,d,e,f=gyration_tensor(coord)
-	gyr.append(R)
-	#print(coord)
-	avDist = np.array([0.0,0.0,0.0])
-	#print(coord[3])
+	largeClust = np.where(np.bincount(data.particles['Cluster'])>=5)[0]
+	print(largeClust[1:])
+	for clust in largeClust[1:]:
+		boolStr = 'Cluster =='+str(clust)
+		node.modifiers.append(ExpressionSelectionModifier(expression =boolStr))
+		data=node.compute(frame)
+		print('number of coordinates in cluster number ',clust, 'is ', sum(data.particles.selection.array))
+		coords_RG = data.particles['Position'].array
+		coords_RG = coords_RG[np.nonzero(data.particles.selection)]
+		node.modifiers.append(UnwrapTrajectoriesModifier())
+		data = node.compute(frame)
+		print('cluster: ',clust,'numPart',sum(data.particles.selection.array))
+		coord = data.particles['Position'].array
+		coord = coord[np.nonzero(data.particles.selection)]
+		a,b,c,R,d,e,f=gyration_tensor(coord)
+		gyr.append(R)
+		ds.append(d)
+		es.append(e)
+		fs.append(f)
+		num_gyr.append(len(coord))
+		avDist = np.array([0.0,0.0,0.0])
 		
-	for particle in range(1,len(coord)):
-		dist = coord[particle] - coord[0]
-		dist = nf.periodic_boundary(dist,L)
-		avDist += dist/(len(coord)-1)
-		avPos = coord[0] + avDist
-		gyration = avDist[0]**2+avDist[1]**2+avDist[2]**2
-	for particle in range(1,len(coord)):
-		dist = coord[particle] - avPos
-		dist = nf.periodic_boundary(dist,L)
-		gyration+=dist[0]**2 +dist[1]**2 + dist[2]**2
-	r_gyr[frame-lag] = pl.sqrt(gyration/len(coord))
-	num1[frame-lag] = len(coord)
-gyr=np.concatenate(gyr).ravel()
-pl.plot(num1,r_gyr,'o')
-pl.plot(num1,gyr,'x')
-
+		for particle in range(1,len(coords_RG)):
+			dist = coords_RG[particle] - coord[0]
+			dist = nf.periodic_boundary(dist,L)
+			avDist += dist/(len(coords_RG)-1)
+			avPos = coords_RG[0] + avDist
+			avPos = nf.periodic_boundary(avPos,L)
+			gyration = avDist[0]**2+avDist[1]**2+avDist[2]**2
+		for particle in range(1,len(coords_RG)):
+			dist = coords_RG[particle] - avPos
+			dist = nf.periodic_boundary(dist,L)
+			gyration+=dist[0]**2 +dist[1]**2 + dist[2]**2
+		r_gyr.append(pl.sqrt(gyration/len(coord)))
+gyr=np.array(gyr).flatten()
 T = sys.argv[4]
-print(T)
+pl.savetxt('r_gyr_num_T'+T+'_lag'+str(lag)+'_old.txt',np.real([num_gyr,gyr,r_gyr,ds,es,fs]))
