@@ -87,7 +87,7 @@ def readTCC(tccFile):
 			elif line[0] == 'A' or line[0] == 'B':
 				tcc_part[counter].append(0)
 	return tcc_part
-tcc_part=readTCC('../glass_KA21/T0.55/TCC/T0.55_N10002_NVT_step_100LJ_run2_cut.xyz.rcAA2.rcAB2.rcBB2.Vor1.fc1.PBCs1.raw_11A')
+tcc_part=readTCC(sys.argv[1]+'/TCC/' + sys.argv[2]+'.rcAA2.rcAB2.rcBB2.Vor1.fc1.PBCs1.raw_11A')
 frameCount=0
 writeFile = 1
 all_CRR=[]
@@ -126,6 +126,6 @@ with open(outFile,'w') as outFile:
 					outFile.write('{} 0 {} {} {} {}\n'.format(tcc_part[frame][particle],1000,allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
 
 
-
+T = sys.argv[4]
 print(len(all_CRR),len(all_11A))
-pl.savetxt('all_T055_CRR_TCC_binary.txt',[np.array(all_CRR).flatten(),np.array(all_11A).flatten()])
+pl.savetxt('all_T'+T+'_CRR_TCC_binary_lag'+sys.argv[3]+'.txt',[np.array(all_CRR).flatten(),np.array(all_11A).flatten()])
