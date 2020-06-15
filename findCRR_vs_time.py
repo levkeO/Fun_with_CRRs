@@ -14,18 +14,17 @@ import facil_module as nf
 # Variables to change  and load command line arguments:
 rho = 1.4                       # number density for periodic boundaries
 numFrames = int(sys.argv[3])
-numPart = 10002			# number of particles
+numPart = int(sys.argv[4])	# number of particles
 numFast = int(numPart/10)
 print(numFast)
 path2 = sys.argv[1]
 filexyz = sys.argv[2] 		# coordinate file from command line
-side  = (numPart / rho)**(1/3)
+L  = (numPart / rho)**(1/3)
 node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
 
 allCoords = nf.readCoords(path2+filexyz, numFrames,numPart)
 counter =0
 
-L = 19.25985167448
 
 def set_cell(frame, data):
         """
@@ -61,7 +60,7 @@ else:
 t_numClmin = []
 t_max_largest = []
 t_5max = []
-startFrames = range(0,400,50)
+startFrames = range(0,300,20)
 for startFrame in  startFrames:
 	sLargest = []
 	s2Largest = []
@@ -73,7 +72,7 @@ for startFrame in  startFrames:
 			node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
 			node.modifiers.append(set_cell)
 			data = node.compute(frame)
-			dist =np.array([nf.squareDist(allCoords[:,particle,:],startFrame,frame,side) for particle in range(numPart)])
+			dist =np.array([nf.squareDist(allCoords[:,particle,:],startFrame,frame,L) for particle in range(numPart)])
 			fastPart = dist.argsort()[:numFast]
 			ID = np.array(range(data.particles.count))
 			fast = np.zeros(data.particles.count)
