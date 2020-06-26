@@ -1,5 +1,6 @@
 *.xyz
 *.swp
+*.swo
 *.ipynb
 *.npy
 *.pdf

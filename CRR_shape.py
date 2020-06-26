@@ -46,7 +46,7 @@ L  = (numPart / rho)**(1/3)
 allCoords = nf.readCoords(path2+filexyz, numFrames,numPart)
 counter =0
 outFile ='fastPart_'+ filexyz[:-4] + '_temp_tau_a.xyz'
-
+print(L)
 def set_cell(frame, data):
         """
         Modifier to set cell of xyz-files
@@ -73,7 +73,7 @@ sLargest = []
 s2Largest = []
 numClust = []
 sum5 = []
-writeFile = 0
+writeFile = 1
 if writeFile ==1:
 	outFile ='CRRs_'+ filexyz[:-4] + '_new.xyz'
 else:
@@ -81,12 +81,15 @@ else:
 frameCount = 0
 numNeighTot =[]
 numNeighCl1 = []
+mobility = []
+clusdistr = []
 with open(outFile,'w') as outFile:
 	for frame in range(lag,numFrames,1):
 		node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
 		node.modifiers.append(set_cell)
 		dist =np.array([nf.squareDist(allCoords[:,particle,:],frame-lag,frame,L) for particle in range(numPart)])
-		fastPart = dist.argsort()[:numFast]
+		mobility.append(dist)
+		fastPart = dist.argsort()[-numFast:]
 		fast = np.zeros(numPart)
 		for particle in range(numPart):
 			if particle in fastPart:
@@ -94,13 +97,13 @@ with open(outFile,'w') as outFile:
 		node.modifiers.append(partID)
 		node.modifiers.append(ExpressionSelectionModifier(expression = 'fast ==1 '))
 		node.modifiers.append(ClusterAnalysisModifier(cutoff = cutoff,sort_by_size = True,only_selected = True,unwrap_particles=True))	
-		# here clusters analysed at first frame --> average over all frames of this cluster???
 		data = node.compute(frame-int(lag))
 		cluster_sizes = np.bincount(data.particles['Cluster'])
 		sLargest.append(cluster_sizes[1])
 		s2Largest.append(cluster_sizes[2])
 		numClust.append(len(cluster_sizes))
 		sum5.append(sum(cluster_sizes[1:6]))
+		clusdistr.append(cluster_sizes[1:])
 		if writeFile == 1:
 			outFile.write('{}\nAtoms. Timestep: {}\n'.format(numPart,frameCount))
 			frameCount +=1
@@ -116,9 +119,6 @@ with open(outFile,'w') as outFile:
 		data = node.compute(frame-lag)
 		property_Neigh(data,cutoff)
 		numNeigh = data.particles["neighCut"].array
-		sum(data.particles.selection.array)
-		numNeigh = numNeigh[data.particles.selection.array]
-		print(len(numNeigh))
 		numNeighTot.append(numNeigh)
 		largeClust =(cluster_sizes[cluster_sizes>=5]).argmin()
 		boolExp = 'Cluster <=' + str(largeClust)
@@ -131,6 +131,12 @@ with open(outFile,'w') as outFile:
 		numNeighCl1.append(np.array(numNeigh))
 numNeighTot=np.array(numNeighTot).flatten()
 numNeighCl1=np.concatenate(numNeighCl1).ravel()
+clusdistr=np.concatenate(clusdistr).ravel()
+mobility=np.array(mobility).flatten()
 T = sys.argv[4]
-np.savetxt('T'+T+'_neighbours_all_lag_'+sys.argv[3]+'.txt',numNeighTot)
-np.savetxt('T'+T+'_neighbours_larger5_lag_'+sys.argv[3]+'.txt',numNeighCl1)
+print(numNeighTot)
+np.savetxt('/results/T'+T+'_neighbours_all_lag_'+sys.argv[3]+'.txt',numNeighTot)
+np.savetxt('/results/T'+T+'_neighbours_larger5_lag_'+sys.argv[3]+'.txt',numNeighCl1)
+np.savetxt('/results/T'+T+'_mobility_lag_'+sys.argv[3]+'.txt',mobility)
+np.savetxt('/results/T'+T+'_clusDistr_lag_'+sys.argv[3]+'.txt',clusdistr)
+
