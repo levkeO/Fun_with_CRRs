@@ -55,7 +55,7 @@ writeFile = 0
 if writeFile == 0:
 	outFi = 'temp.txt'
 else:
-	outFi ='fastPart_'+ filexyz[:-4] + '_temp.xyz'
+	outFi ='/results/fastPart_'+ filexyz[:-4] + '.xyz'
 
 t_numClmin = []
 t_max_largest = []
@@ -73,7 +73,7 @@ for startFrame in  startFrames:
 			node.modifiers.append(set_cell)
 			data = node.compute(frame)
 			dist =np.array([nf.squareDist(allCoords[:,particle,:],startFrame,frame,L) for particle in range(numPart)])
-			fastPart = dist.argsort()[:numFast]
+			fastPart = dist.argsort()[-numFast:]
 			ID = np.array(range(data.particles.count))
 			fast = np.zeros(data.particles.count)
 			for particle in ID:
@@ -109,7 +109,7 @@ for startFrame in  startFrames:
 print('time minimum number of clusters: ', t_numClmin)
 print('time maximum largest cluster: ', t_max_largest)
 print('time largest 5 clusters: ',t_5max)
-pl.savetxt('CRR_finder_'+filexyz[:-4]+'.txt',[startFrames,t_numClmin,t_max_largest,t_5max])
+pl.savetxt('/results/CRR_finder_'+filexyz[:-4]+'.txt',[startFrames,t_numClmin,t_max_largest,t_5max])
 pl.legend(frameon=False)
 pl.figure(1)
 pl.legend(frameon=False)

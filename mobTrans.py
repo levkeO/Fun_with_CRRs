@@ -68,7 +68,7 @@ delta = 10
 for frame in range(delta,node.source.num_frames-delta,delta):
 	node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
 	dist =np.array([nf.squareDist(allCoords[:,particle,:],frame-delta,delta,frame,side) for particle in range(numPart)])
-	fastPart = dist.argsort()[:numFast]
+	fastPart = dist.argsort()[-numFast:]
 	ID = np.array(range(data.particles.count))
 	fast = np.zeros(data.particles.count)
 	for particle in ID:
