@@ -89,7 +89,7 @@ def readTCC(tccFile):
 	return tcc_part
 tcc_part=readTCC(sys.argv[1]+'/TCC/' + sys.argv[2]+'.rcAA2.rcAB2.rcBB2.Vor1.fc1.PBCs1.raw_11A')
 frameCount=0
-writeFile = 1
+writeFile = 0
 all_CRR=[]
 all_11A = []
 if writeFile ==1:
@@ -102,7 +102,7 @@ with open(outFile,'w') as outFile:
 		node.modifiers.append(set_cell)
 		dist =np.array([nf.squareDist(allCoords[:,particle,:],frame-lag,frame,side) for particle in range(numPart)])
 		data = node.compute(frame-int(lag))
-		fastPart = dist.argsort()[:numFast]
+		fastPart = dist.argsort()[-numFast:]
 		ID = np.array(range(data.particles.count))
 		fast = np.zeros(data.particles.count)
 		for particle in ID:
@@ -127,5 +127,4 @@ with open(outFile,'w') as outFile:
 
 
 T = sys.argv[4]
-print(len(all_CRR),len(all_11A))
-pl.savetxt('all_T'+T+'_CRR_TCC_binary_lag'+sys.argv[3]+'.txt',[np.array(all_CRR).flatten(),np.array(all_11A).flatten()])
+pl.savetxt('/results/all_T'+T+'_CRR_TCC_binary_lag'+sys.argv[3]+'.txt',[np.array(all_CRR).flatten(),np.array(all_11A).flatten()])
