@@ -75,7 +75,7 @@ numClust = []
 sum5 = []
 writeFile = 1
 if writeFile ==1:
-	outFile ='CRRs_'+ filexyz[:-4] + '_new.xyz'
+	outFile ='results/CRRs_'+ filexyz[:-4] + '_new.xyz'
 else:
 	outFile = 'tmp.test'
 frameCount = 0
@@ -135,8 +135,8 @@ clusdistr=np.concatenate(clusdistr).ravel()
 mobility=np.array(mobility).flatten()
 T = sys.argv[4]
 print(numNeighTot)
-np.savetxt('/results/T'+T+'_neighbours_all_lag_'+sys.argv[3]+'.txt',numNeighTot)
-np.savetxt('/results/T'+T+'_neighbours_larger5_lag_'+sys.argv[3]+'.txt',numNeighCl1)
-np.savetxt('/results/T'+T+'_mobility_lag_'+sys.argv[3]+'.txt',mobility)
-np.savetxt('/results/T'+T+'_clusDistr_lag_'+sys.argv[3]+'.txt',clusdistr)
+np.savetxt('results/T'+T+'_neighbours_all_lag_'+sys.argv[3]+'.txt',numNeighTot)
+np.savetxt('results/T'+T+'_neighbours_larger5_lag_'+sys.argv[3]+'.txt',numNeighCl1)
+np.savetxt('results/T'+T+'_mobility_lag_'+sys.argv[3]+'.txt',mobility)
+np.savetxt('results/T'+T+'_clusDistr_lag_'+sys.argv[3]+'.txt',clusdistr)
 

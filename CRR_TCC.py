@@ -45,7 +45,7 @@ side  = (numPart / rho)**(1/3)
 
 allCoords = nf.readCoords(path2+filexyz, numFrames,numPart)
 counter =0
-outFile ='TCC_CRR_'+ filexyz[:-4] + '_temp.xyz'
+outFile ='results/TCC_CRR_'+ filexyz[:-4] + '.xyz'
 
 def set_cell(frame, data):
         """
@@ -127,4 +127,4 @@ with open(outFile,'w') as outFile:
 
 
 T = sys.argv[4]
-pl.savetxt('/results/all_T'+T+'_CRR_TCC_binary_lag'+sys.argv[3]+'.txt',[np.array(all_CRR).flatten(),np.array(all_11A).flatten()])
+pl.savetxt('results/all_T'+T+'_CRR_TCC_binary_lag'+sys.argv[3]+'.txt',[np.array(all_CRR).flatten(),np.array(all_11A).flatten()])

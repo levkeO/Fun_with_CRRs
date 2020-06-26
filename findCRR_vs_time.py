@@ -55,12 +55,12 @@ writeFile = 0
 if writeFile == 0:
 	outFi = 'temp.txt'
 else:
-	outFi ='/results/fastPart_'+ filexyz[:-4] + '.xyz'
+	outFi ='results/fastPart_'+ filexyz[:-4] + '.xyz'
 
 t_numClmin = []
 t_max_largest = []
 t_5max = []
-startFrames = range(0,300,20)
+startFrames = [0]#range(0,300,20)
 for startFrame in  startFrames:
 	sLargest = []
 	s2Largest = []
@@ -109,7 +109,7 @@ for startFrame in  startFrames:
 print('time minimum number of clusters: ', t_numClmin)
 print('time maximum largest cluster: ', t_max_largest)
 print('time largest 5 clusters: ',t_5max)
-pl.savetxt('/results/CRR_finder_'+filexyz[:-4]+'.txt',[startFrames,t_numClmin,t_max_largest,t_5max])
+pl.savetxt('results/CRR_finder_'+filexyz[:-4]+'.txt',[startFrames,t_numClmin,t_max_largest,t_5max])
 pl.legend(frameon=False)
 pl.figure(1)
 pl.legend(frameon=False)

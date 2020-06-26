@@ -52,7 +52,7 @@ def writexyz(fileXYZ,outFile):
 writexyz(fileXYZ,outXYZ)
 print(CRR[:20])
 print(sevenA_pop[:20])
-np.savetxt('CRRs_T0.500_N10002_KA21.txt',np.array(CRR))
-np.savetxt('sevenAs_T0.500_N10002_KA21.txt',np.array(sevenA_pop))
+np.savetxt('results/CRRs_T0.500_N10002_KA21.txt',np.array(CRR))
+np.savetxt('results/sevenAs_T0.500_N10002_KA21.txt',np.array(sevenA_pop))
 
 
