@@ -178,4 +178,4 @@ for frame in range(lag,numFrames,1):
 		r_gyr.append(pl.sqrt(gyration/len(coords_RG)))
 #gyr=np.array(gyr).flatten()
 T = sys.argv[4]
-pl.savetxt('r_gyr_noTen_num_T'+T+'_lag'+str(lag)+'_N_'+str(numPart)+'.txt',np.real([num_gyr,r_gyr,clusID,clusCount]))
+pl.savetxt('/results/r_gyr_noTen_num_T'+T+'_lag'+str(lag)+'_N_'+str(numPart)+'.txt',np.real([num_gyr,r_gyr,clusID,clusCount]))
