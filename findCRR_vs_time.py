@@ -60,7 +60,7 @@ else:
 t_numClmin = []
 t_max_largest = []
 t_5max = []
-startFrames = range(0,500,50)
+startFrames = range(0,300,50)
 for startFrame in  startFrames:
 	sLargest = []
 	s2Largest = []
