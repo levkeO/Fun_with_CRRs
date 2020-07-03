@@ -75,7 +75,7 @@ numClust = []
 sum5 = []
 writeFile = 1
 if writeFile ==1:
-	outFile ='results/CRRs_'+ filexyz[:-4] + '_new.xyz'
+	outFile ='results/CRRs_'+ filexyz[:-4] + '.xyz'
 else:
 	outFile = 'tmp.test'
 frameCount = 0

@@ -6,9 +6,9 @@ from numba.extending import overload
 from collections import Counter
 # now per frame and check why there are so many!
 
-file7A =  '../glass_KA21/T0.5/TCC/T0.500_N10002_KA21.xyz.rcAA2.rcAB2.rcBB2.Vor1.fc0.82.PBCs1.clusts_sp5c'
-fileXYZ =  'CRRs_T0.500_N10002_KA21_new.xyz'
-outXYZ = 'T0.500_N10002_KA21_5_memberedRings_test.xyz'
+file7A =  '../glass_KA21/T0.52/TCC/T0.52_N10002_NVT_step_100LJ_startFrame500.xyz.rcAA2.rcAB2.rcBB2.Vor1.fc0.82.PBCs1.clusts_sp5c'
+fileXYZ =  'results/CRRs_T0.52_N10002_NVT_step_100LJ_startFrame500.xyz'
+outXYZ = 'T0.52_N10002_NVT_step_100LJ_startFrame500_5_memberedRings_fc082.xyz'
 def load7A(file7A):
 	IDs = {}
 	with open(file7A, 'r') as readFile:
@@ -27,7 +27,7 @@ def load7A(file7A):
 IDs = load7A(file7A)
 sevenA_pop = []
 CRR = []
-numFrames = 512
+numFrames = 1000
 def writexyz(fileXYZ,outFile):
 	with open(fileXYZ, 'r') as readFile, open(outXYZ, 'w') as writeFile:
 		frame = -1
@@ -52,7 +52,7 @@ def writexyz(fileXYZ,outFile):
 writexyz(fileXYZ,outXYZ)
 print(CRR[:20])
 print(sevenA_pop[:20])
-np.savetxt('results/CRRs_T0.500_N10002_KA21.txt',np.array(CRR))
-np.savetxt('results/sevenAs_T0.500_N10002_KA21.txt',np.array(sevenA_pop))
+np.savetxt('results/CRRs_T0.520_N10002_KA21_fc1.txt',np.array(CRR))
+np.savetxt('results/sevenAs_T0.520_N10002_KA21_fc082.txt',np.array(sevenA_pop))
 
 

@@ -30,7 +30,7 @@ def property_Neigh(data,cutoff):
         data.particles_.create_property('neighCut',data=neighArray)
 
 
-filexyz = sys.argv[1]+sys.argv[2]
+filexyz = sys.argv[1]+'CRR/'+sys.argv[2]
 lag = int(sys.argv[3]) # time lag max dynamic heterogeneity in frames for chosen file
 
 rho = 1.4                       # number density for periodic boundaries
