@@ -11,11 +11,12 @@ from numba import njit, config, __version__
 from numba.extending import overload
 
 
-fa_results=(pd.read_csv('../glass_KA21/facilitation/facilitation/excitation_results_T0.55_restart_N10002_NVT_step_1LJ_startFrame400.csv'))
-CRR_file =   'results/CRRs_T0.55_N10002_NVT_step_50LJ_startFrame400_new.xyz'
+fa_results=pd.read_csv('/home/xn18583/Simulations/glass_KA21/facilitation/facilitation/excitation_results_Trestart_T0.55_N10002_NVT_step_1LJ_startFrame100.csv')#            '../glass_KA21/facilitation/facilitation/excitation_results_T0.55_restart_N10002_NVT_step_1LJ_startFrame100.csv'))
+CRR_file =   'results/CRRs_T0.55_N10002_NVT_step_50LJ_startFrame100.xyz'
+lag = 19
 numPart = 10002
-numFrames = 981
-numReFiles = 8
+numFrames = 1001-lag
+numReFiles = 50
 
 def readCoords(filexyz, numFrames, numPart):
 	"""
@@ -66,19 +67,21 @@ for index,key in enumerate(fa_results):
 		#print(exInd)
 		excis[index-1,exInd]=1
 		startFrame = int(intkey/1000/50)
-		exFrames.append(startFrame)
-		for frame in range(startFrame-avFrames,startFrame+avFrames):
-			aver[index-1,:] += CRR[frame,:]/(2*avFrames)
+		print(startFrame)
+		exFrames.append(startFrame-lag)
+		aver[index-1,:] = CRR[startFrame-lag,:]
+		#for frame in range(startFrame-avFrames,startFrame+avFrames):
+		#	aver[index-1,:] += CRR[frame-lag,:]/(2*avFrames)
 
 
-for i in range(8):
+for i in range(numReFiles):
 	#print(sum(excis[:,i]))
 	print(aver[i,excis[i,:].astype(int)==1].mean(),aver[i,:].mean())
 
 numFrames = 10002
-outFile = 'results/test_facilitation_CRR_T0.55.xyz'
+outFile = 'results/facilitation_CRR_T0.55.xyz'
 with open (outFile, 'w') as outFile:
-	for frame in range(8):
+	for frame in range(numReFiles):
 		outFile.write('{}\nAtoms. Timestep: {}\n'.format(numPart,frame))
 		for particle in range(numPart):
 			outFile.write('{} {} {} {} {}\n'.format(CRR[exFrames[frame],particle],excis[frame,particle],allCoords[exFrames[frame]][particle,0],allCoords[exFrames[frame]][particle,1],allCoords[exFrames[frame]][particle,2]))
