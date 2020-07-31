@@ -75,7 +75,7 @@ numClust = []
 sum5 = []
 writeFile = 1
 if writeFile ==1:
-	outFile ='results/CRRs_'+ filexyz[:-4] + '.xyz'
+	outFile ='results/CRRs_'+ filexyz[:-4] + 'back.xyz'
 else:
 	outFile = 'tmp.test'
 frameCount = 0
@@ -84,10 +84,10 @@ numNeighCl1 = []
 mobility = []
 clusdistr = []
 with open(outFile,'w') as outFile:
-	for frame in range(lag,numFrames,1):
+	for frame in range(0,numFrames-lag,1):
 		node = import_file(sys.argv[1]+sys.argv[2],multiple_frames=True,columns =["Particle Type", "Position.X", "Position.Y", "Position.Z"])
 		node.modifiers.append(set_cell)
-		dist =np.array([nf.squareDist(allCoords[:,particle,:],frame-lag,frame,L) for particle in range(numPart)])
+		dist =np.array([nf.squareDist(allCoords[:,particle,:],frame+lag,frame,L) for particle in range(numPart)])
 		mobility.append(dist)
 		fastPart = dist.argsort()[-numFast:]
 		fast = np.zeros(numPart)
