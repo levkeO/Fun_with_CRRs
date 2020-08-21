@@ -109,9 +109,9 @@ with open(outFile,'w') as outFile:
 			frameCount +=1
 			for particle in range(numPart):
 				if particle in fastPart:
-					outFile.write('A {} {} {} {}\n'.format(data.particles['Cluster'].array[particle],allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
+					outFile.write('A {} {} {}\n'.format(allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
 				else:
-					outFile.write('B {} {} {} {}\n'.format(1000,allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
+					outFile.write('B {} {} {}\n'.format(allCoords[frame][particle,0],allCoords[frame][particle,1],allCoords[frame][particle,2]))
 		#Clusters:
 		node.modifiers.append(ExpressionSelectionModifier(expression = 'Cluster >0 '))
 		node.modifiers.append(InvertSelectionModifier())
@@ -134,9 +134,10 @@ numNeighCl1=np.concatenate(numNeighCl1).ravel()
 clusdistr=np.concatenate(clusdistr).ravel()
 mobility=np.array(mobility).flatten()
 T = sys.argv[4]
+startFrame = sys.argv[7]
 print(numNeighTot)
-np.savetxt('results/T'+T+'_neighbours_all_lag_'+sys.argv[3]+'_forwards.txt',numNeighTot)
-np.savetxt('results/T'+T+'_neighbours_larger5_lag_'+sys.argv[3]+'_forwards.txt',numNeighCl1)
-np.savetxt('results/T'+T+'_mobility_lag_'+sys.argv[3]+'_forwards.txt',mobility)
-np.savetxt('results/T'+T+'_clusDistr_lag_'+sys.argv[3]+'_forwards.txt',clusdistr)
+np.savetxt('results/T'+T+'_neighbours_all_lag_'+sys.argv[3]+'start'+startFrame+'_forwards.txt',numNeighTot)
+np.savetxt('results/T'+T+'_neighbours_larger5_lag_'+sys.argv[3]+'start'+startFrame+'_forwards.txt',numNeighCl1)
+np.savetxt('results/T'+T+'_mobility_lag_'+sys.argv[3]+'start'+startFrame+'_forwards.txt',mobility)
+np.savetxt('results/T'+T+'_clusDistr_lag_'+sys.argv[3]+'start'+startFrame+'_forwards.txt',clusdistr)
 
